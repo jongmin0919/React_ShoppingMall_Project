@@ -1,4 +1,7 @@
+// HomePage.tsx
 import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useProductContext } from "../contexts/ProductContext";
 
 
 /*----------------- 타입 선언 부분 -------------------------*/
@@ -26,7 +29,9 @@ const ProductItem = ({ product, onDelete, onUpdate }: ProductItemProps) => {
   return (
     <div>
       <div>{id}</div>
-      <div>{name}</div>
+      <div>
+        <Link to={`/${id}`}>{name}</Link>
+      </div>
       <div>{price}</div>
       <div>{explanation}</div>
       <button type="button" onClick={() => onDelete(id)}>
@@ -74,6 +79,7 @@ const ProductItem = ({ product, onDelete, onUpdate }: ProductItemProps) => {
 
 /*----------------- App.tsx 메인 부분 -------------------------*/
 function HomePage() {
+  const [products, setProducts] = useProductContext();
   const fakeId = useRef(0);
   const handleCreate = (newProduct: Omit<ProductType, "id">) => {
     fakeId.current++;
@@ -102,17 +108,6 @@ function HomePage() {
       )
     );
   };
-
-  const [products, setProducts] = useState<ProductType[]>([
-    {
-      id: 0,
-      name: "Iphone 13 Max",
-      explanation:
-        "디스플레이는 6.1인치 19.5:9 비율의 어쩌고 저쩌고 해상도를 지원합니다",
-      price: 1230000,
-    },
-  ]);
-
   const [name, setName] = useState("");
   const [explanation, setExplanation] = useState("");
   const [price, setPrice] = useState(0);
