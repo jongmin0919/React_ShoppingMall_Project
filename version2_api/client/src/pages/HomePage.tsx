@@ -1,5 +1,5 @@
 // HomePage.tsx
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useProductContext } from "../contexts/ProductContext";
 
@@ -7,7 +7,7 @@ import { useProductContext } from "../contexts/ProductContext";
 
 // ProductType 인터페이스는 각 제품의 속성을 정의합니다.
 interface ProductType {
-  id: number; // 제품의 고유 ID
+  id: string; // 제품의 고유 ID
   name: string; // 제품 이름
   explanation: string; // 제품 설명
   price: number; // 제품 가격
@@ -16,7 +16,7 @@ interface ProductType {
 // ProductItemProps 인터페이스는 ProductItem 컴포넌트가 받는 props를 정의합니다.
 interface ProductItemProps {
   product: ProductType; // 개별 제품 객체
-  onDelete: (id: number) => void; // 제품을 삭제할 때 호출되는 함수
+  onDelete: (id: string) => void; // 제품을 삭제할 때 호출되는 함수
   onUpdate: (product: ProductType) => void; // 제품 정보를 수정할 때 호출되는 함수
 }
 
@@ -97,52 +97,71 @@ const ProductItem = ({ product, onDelete, onUpdate }: ProductItemProps) => {
 
 function HomePage() {
   // useProductContext 훅을 사용하여 컨텍스트에서 제품 목록과 제품 목록을 업데이트하는 함수를 가져옴
-  const [products, setProducts] = useProductContext();
+  const [products, setProducts] = useState<ProductType[]>([]);
 
-  // 새로운 제품을 생성할 때 사용할 임시 ID를 관리하는 ref
-  const fakeId = useRef(0);
-
-  // 새로운 제품을 생성하는 함수인데
-  // 여기서 새로운 제품의 타입을 기존의 ProductType에 id를 제외한 나머지 속성으로 지정함
-  // 이는 기존의 ProductType의 속성 중 id에 대한 타입 또한 지정되어 있기 때문에
-  // 제품을 추가할 경우 id값은 해당 HomePage에서 관리하고 있는 useRef의 값을 이용해야 하기 때문임.
+  // 상품 생성을 누를 경우 서버에 요청할 때 요청 정보가 url에 기록이 되면 안되기 때문에
+  // post 방식으로 정보를 담아줘서 요청을 해야함
   const handleCreate = (newProduct: Omit<ProductType, "id">) => {
-    fakeId.current++; // 새로운 제품의 ID를 생성
-    setProducts([
-      ...products, // 기존 제품 목록
-      {
-        ...newProduct,
-        id: fakeId.current, // 새로운 ID를 가진 제품 추가
+    fetch(`product`, {
+      method: "post",
+      headers: {
+        // 보내는 본문 타입이 json 타입임을 명시
+        "Content-Type": "application/json",
       },
-    ]);
+      // 실제 데이터는 사용자가 입력한 newProduct 정보를 json 직렬화 시킨 문자열을 보냄
+      body: JSON.stringify(newProduct),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setProducts((prev) => [...prev, data.product]);
+      });
   };
 
   // 특정 제품을 삭제하는 함수이며, filter를 이용해 새로운 상품 배열을 제공 받음
   // 이때의 조건은 삭제하고자 하는 제품의 id만을 뺀 나머지 상품 배열을 받아오는 거임
-  const handleDelete = (id: number) => {
-    setProducts(products.filter((product) => product.id !== id));
+  const handleDelete = (id: string) => {
+    fetch(`/product/${id}/`, {
+      method: "DELETE",
+    }).then((response) => {
+      if (response.ok) {
+        setProducts(products.filter((product) => product.id !== id));
+      }
+    });
   };
 
-  // 특정 제품을 업데이트하는 함수로
-  // 사용자가 입력한 상품을 받아 수정하고자 하는 상품의 id와 기존 id가 동일한 경우
-  // 수정할 상품 정보를 반환하고, 그렇지 않은 경우, 즉 기존의 상품들일 경우 그대로 반환함
-  const handleUpdate = (updateProduct: {
-    id: number;
-    name: string;
-    explanation: string;
-    price: number;
-  }) => {
-    setProducts(
-      products.map((product) =>
-        product.id === updateProduct.id ? updateProduct : product
-      )
-    );
+  const handleUpdate = (updateProduct: ProductType) => {
+    // 서버에 PUT 요청을 보내서 제품 데이터 업데이트
+    fetch(`/product/${updateProduct.id}`, {
+      method: "PATCH", // HTTP 메서드 patch를 사용하여 업데이트 요청
+      headers: {
+        "Content-Type": "application/json", // 요청의 본문이 JSON 형식임을 명시
+      },
+      body: JSON.stringify(updateProduct), // 업데이트할 제품 데이터를 JSON 문자열로 변환하여 요청의 본문으로 보냄
+    }).then((response) => {
+      if (response.ok) {
+        setProducts(
+          products.map((product) =>
+            product.id === updateProduct.id ? updateProduct : product
+          )
+        );
+      }
+    });
   };
 
   // 폼 입력값을 관리하는 상태들
   const [name, setName] = useState(""); // 제품 이름 입력 값
   const [explanation, setExplanation] = useState(""); // 제품 설명 입력 값
   const [price, setPrice] = useState(0); // 제품 가격 입력 값
+
+  // 웹서버로부터 API를 호출
+  useEffect(() => {
+    fetch("/product")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.products);
+        setProducts(data.products);
+      });
+  }, []);
 
   return (
     <>
