@@ -1,4 +1,5 @@
 // HomePage.tsx
+
 import { ProductList } from "../components/home";
 
 /*----------------- HomePage 컴포넌트 -------------------------*/
@@ -6,6 +7,7 @@ import { ProductList } from "../components/home";
 function HomePage() {
   return(
     <>
+      
       <ProductList/>
     </>
   );

@@ -1,3 +1,4 @@
+import CreateIcon from '@mui/icons-material/Create';
 import { AppBar, Box, Button, Container, Fab, Toolbar, Typography } from "@mui/material"
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +32,7 @@ const handlePushCreatePage = () => navigate('/create');
       </Box>
       <Box sx={{ position: "fixed", bottom: "16px", right: "16px" }}>
         <Fab color="primary" onClick = {handlePushCreatePage}>
-          추가하기
+          <CreateIcon/>
         </Fab>
       </Box>
     </>

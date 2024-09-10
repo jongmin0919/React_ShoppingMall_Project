@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { ProductType } from "../../types/index";
 import { ProductItem } from ".";
+import { CircularProgress } from "@mui/material";
 
 const ProductList = () => {
   // useProductContext 훅을 사용하여 컨텍스트에서 제품 목록과 제품 목록을 업데이트하는 함수를 가져옴
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 특정 제품을 삭제하는 함수이며, filter를 이용해 새로운 상품 배열을 제공 받음
   // 이때의 조건은 삭제하고자 하는 제품의 id만을 뺀 나머지 상품 배열을 받아오는 거임
@@ -41,13 +43,17 @@ const ProductList = () => {
 
   // 웹서버로부터 API를 호출
   useEffect(() => {
+    setIsLoading(true);
     fetch("/product")
       .then((response) => response.json())
       .then((data) => {
         console.log(data.products);
         setProducts(data.products);
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
+
+  if(isLoading) return <CircularProgress/>;
 
   return (
     <div>

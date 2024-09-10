@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ProductType } from "../../types";
-
+import {Button, Container, TextField, Typography} from "@mui/material";
 const ProductCreateForm = () => {
     // 폼 입력값을 관리하는 상태들
   const [name, setName] = useState(""); // 제품 이름 입력 값
@@ -9,8 +9,14 @@ const ProductCreateForm = () => {
 
   // 상품 생성을 누를 경우 서버에 요청할 때 요청 정보가 url에 기록이 되면 안되기 때문에
   // post 방식으로 정보를 담아줘서 요청을 해야함
-  const handleCreate = (newProduct: Omit<ProductType, "id">) => {
-    fetch(`product`, {
+  const handleCreate = (event : React.FormEvent) => {
+    event.preventDefault()
+    const newProduct: Omit<ProductType, "id"> = {
+      name,
+      explanation,
+      price
+    }
+    fetch(`/product`, {
       method: "post",
       headers: {
         // 보내는 본문 타입이 json 타입임을 명시
@@ -26,43 +32,28 @@ const ProductCreateForm = () => {
   };
   return (
     <>
-      <h1>쇼핑몰 앱 만들어보기</h1>
-
-      {/* 새로운 제품을 생성하는 폼 */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          // 새로운 제품을 생성할 때 handleCreate 함수 호출
-          handleCreate({ name, explanation, price });
-        }}
-      >
-        <input
-          value={name}
-          onChange={(event) => {
-            setName(event.target.value); // 제품 이름 입력 값 업데이트
-          }}
-          type="text"
-          placeholder="상품 이름"
-        />
-        <input
-          value={explanation}
-          onChange={(event) => {
-            setExplanation(event.target.value); // 제품 설명 입력 값 업데이트
-          }}
-          type="text"
-          placeholder="상품 설명"
-        />
-        <input
-          value={price}
-          onChange={(event) => {
-            setPrice(Number(event.target.value)); // 제품 가격 입력 값 업데이트
-          }}
-          type="number"
-          placeholder="상품 가격"
-        />
-        <input type="submit" placeholder="상품 만들기" />
+      <Container maxWidth="sm">
+      <Typography variant="h4" align="center" gutterBottom>
+        상품 생성
+      </Typography>
+      <form onSubmit={handleCreate}>
+        <TextField label = "상품 이름" fullWidth value = {name} onChange={e => {
+          setName(e.target.value)
+        }} margin="normal">
+        </TextField>
+        <TextField label = "상품 설명" fullWidth multiline rows={4} value = {explanation} onChange={e => {
+          setExplanation(e.target.value)
+        }} margin="normal">
+        </TextField>
+        <TextField label = "상품 가격" type="number" fullWidth value = {price} onChange={e => {
+          setPrice(Number(e.target.value))
+        }} margin="normal">
+        </TextField>
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{marginTop:6}}>
+          생성
+        </Button>
       </form>
-
+      </Container>
     </>
   );
 }
