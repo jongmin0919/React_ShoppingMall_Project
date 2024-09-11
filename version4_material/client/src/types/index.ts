@@ -4,5 +4,6 @@ export interface ProductType {
     name: string; // 제품 이름
     explanation: string; // 제품 설명
     price: number; // 제품 가격
+    thumbnail? : string;
 }
 

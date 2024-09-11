@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { ProductType } from "../../types";
 import {Button, Container, TextField, Typography} from "@mui/material";
+import { ThumbnailUploader } from '.';
 const ProductCreateForm = () => {
     // 폼 입력값을 관리하는 상태들
   const [name, setName] = useState(""); // 제품 이름 입력 값
   const [explanation, setExplanation] = useState(""); // 제품 설명 입력 값
   const [price, setPrice] = useState(0); // 제품 가격 입력 값
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   // 상품 생성을 누를 경우 서버에 요청할 때 요청 정보가 url에 기록이 되면 안되기 때문에
   // post 방식으로 정보를 담아줘서 요청을 해야함
@@ -41,14 +43,15 @@ const ProductCreateForm = () => {
           setName(e.target.value)
         }} margin="normal">
         </TextField>
-        <TextField label = "상품 설명" fullWidth multiline rows={4} value = {explanation} onChange={e => {
-          setExplanation(e.target.value)
-        }} margin="normal">
-        </TextField>
         <TextField label = "상품 가격" type="number" fullWidth value = {price} onChange={e => {
           setPrice(Number(e.target.value))
         }} margin="normal">
         </TextField>
+        <TextField label = "상품 설명" fullWidth multiline rows={4} value = {explanation} onChange={e => {
+          setExplanation(e.target.value)
+        }} margin="normal">
+        </TextField>
+        <ThumbnailUploader value = {thumbnail} onChange={file => setThumbnail(file)} />          
         <Button type="submit" variant="contained" color="primary" fullWidth sx={{marginTop:6}}>
           생성
         </Button>
